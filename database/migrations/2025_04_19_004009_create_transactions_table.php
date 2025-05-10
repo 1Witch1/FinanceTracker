@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -20,12 +21,8 @@ return new class extends Migration
             $table->dateTime('date');
             $table->string('comment', 255)->nullable();
             $table->timestamps();
-
-            $table->check('(
-                (income_category_id IS NOT NULL AND expense_category_id IS NULL) OR
-                (income_category_id IS NULL AND expense_category_id IS NOT NULL)
-            )');
         });
+
     }
 
     /**
