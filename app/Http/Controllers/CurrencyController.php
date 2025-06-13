@@ -11,4 +11,8 @@ class CurrencyController extends Controller
     {
         return Currency::all();
     }
+    public function show($id)
+    {
+        return Currency::all()->find($id);
+    }
 }

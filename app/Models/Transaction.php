@@ -35,6 +35,11 @@ class Transaction extends Model
     {
         return $this->belongsTo(ExpenseCategory::class);
     }
+    public function scopeWhereDateBetween($query, $column, $dates)
+    {
+        return $query->whereDate($column, '>=', $dates[0])
+            ->whereDate($column, '<=', $dates[1]);
+    }
 
     // Автоматическая валидация при сохранении
     protected static function boot()

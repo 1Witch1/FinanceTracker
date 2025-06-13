@@ -15,7 +15,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'login' => 'required|string|max:100|unique:users',
             'email' => 'required|email|max:100|unique:users',
-            'password' => ['required', 'confirmed', Password::min(6)],
+            'password' => 'required|string|min:8',
             'currency_id' => 'required|exists:currencies,id'
         ]);
 
@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-            'token' => $user->createToken('auth_token')->plainTextToken
+            'message' => 'Пользователь успешно зарегистрирован!'
         ], 201);
     }
 

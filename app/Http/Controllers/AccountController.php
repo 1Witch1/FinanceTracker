@@ -18,13 +18,13 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'currency_id' => 'required|exists:currencies,id',
-            'initial_balance' => 'required|numeric|min:0'
+            'balance' => 'required|numeric|min:0'
         ]);
 
         $account = $request->user()->accounts()->create([
             'name' => $validated['name'],
             'currency_id' => $validated['currency_id'],
-            'balance' => $validated['initial_balance']
+            'balance' => $validated['balance']
         ]);
 
         return response()->json($account->load('currency'), 201);
@@ -32,21 +32,41 @@ class AccountController extends Controller
 
     public function show(Request $request, Account $account)
     {
-        $this->authorize('view', $account);
-        return $account->load(['currency', 'transactions']);
+        // Проверка, что текущий пользователь является владельцем счета
+        if ($account->user_id !== auth()->id()) {
+            abort(403, 'Access denied');
+        }
+
+        return response()->json($account);
     }
 
     public function destroy(Request $request, Account $account)
     {
-        $this->authorize('delete', $account);
+        // Проверка, что текущий пользователь является владельцем счета
+        if ($account->user_id !== auth()->id()) {
+            abort(403, 'Access denied');
+        }
 
-        DB::transaction(function () use ($account) {
-            if ($account->balance > 0) {
-                abort(422, 'Нельзя удалить счет с положительным балансом');
-            }
-            $account->delete();
-        });
+        $account->delete();
 
-        return response()->noContent();
+        return response()->json(['message' => 'Account deleted successfully']);
+    }
+    public function update(Request $request, Account $account)
+    {
+        // Проверка, что текущий пользователь является владельцем счета
+        if ($account->user_id !== auth()->id()) {
+            abort(403, 'Access denied');
+        }
+        // Валидация данных
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'balance' => 'required|numeric',
+            'currency_id' => 'required|exists:currencies,id',
+        ]);
+
+        // Обновление счета
+        $account->update($validatedData);
+
+        return response()->json($account);
     }
 }
